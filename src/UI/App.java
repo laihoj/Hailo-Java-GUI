@@ -327,17 +327,192 @@ public class App {
 	}
 /////////////////////////////////////////////////////////////////////////////////////////////////
 	
+/////////////////////////////////////////////////////////////////////////////////////////////////
+	abstract public class Widget extends Observer implements Displayable {
+		public Command onMouseHover = null;
+		public Command onMouseHoverOver = null;
+		public Command onMousePress = null;
+		public Command onMouseDrag = null;
+		public Command onMouseHold = null;
+		public Command onMouseRelease = null;
+		public Command onKeyDown = null;
+		public Command onKeyHold = null;
+		public Command onKeyUp = null;
+		
+		public Point point;
+		public Dimensions dimensions;
+
+		public Widget(Point point, Dimensions dimensions) {
+			this.point = point;
+			this.dimensions = dimensions;
+		}
+		public Widget() {
+			this.point = null;
+			this.dimensions = null;
+		}
+		public Widget setOnMouseHover(Command command) {
+			this.onMouseHover = command;
+			return this;
+		}
+		public Widget setOnMouseHoverOver(Command command) {
+			this.onMouseHoverOver = command;
+			return this;
+		}
+		public Widget setOnMousePress(Command command) {
+			this.onMousePress = command;
+			return this;
+		}
+		public Widget setOnMouseDrag(Command command) {
+			this.onMouseDrag = command;
+			return this;
+		}
+		public Widget setOnMouseHold(Command command) {
+			this.onMouseHold = command;
+			return this;
+		}
+		public Widget setOnMouseRelease(Command command) {
+			this.onMouseRelease = command;
+			return this;
+		}
+		public Widget setOnKeyDown(Command command) {
+			this.onKeyDown = command;
+			return this;
+		}
+		public Widget setOnKeyHold(Command command) {
+			this.onKeyHold = command;
+			return this;
+		}
+		public Widget setOnKeyUp(Command command) {
+			this.onKeyUp = command;
+			return this;
+		}
+		
+		public void onMouseHover() {
+			if(onMouseHover != null) {
+				onMouseHover.execute();
+			}
+		}
+
+		public void onMouseHoverOver() {
+			if(onMouseHoverOver != null) {
+				onMouseHoverOver.execute();
+			}
+		}
+
+		public void onMousePress() {
+			if(onMousePress != null) {
+				onMousePress.execute();
+			}
+		}
+
+		public void onMouseDrag(PVector mouse) {
+			if(onMouseDrag != null) {
+				onMouseDrag.execute();
+			}
+		}
+
+		public void onMouseHold() {
+			if(onMouseHold != null) {
+				onMouseHold.execute();
+			}
+		}
+
+		public void onMouseRelease() {
+			if(onMouseRelease != null) {
+				onMouseRelease.execute();
+			}
+		}
+
+		public void onKeyDown(char c) {
+			if(onKeyDown != null) {
+				onKeyDown.execute();
+			}
+		}
+
+		public void onKeyHold(char c) {
+			if(onKeyHold != null) {
+				onKeyHold.execute();
+			}
+		}
+
+		public void onKeyUp(char c) {
+			if(onKeyUp != null) {
+				onKeyUp.execute();
+			}
+		}
+
+		public boolean isSelected() {
+			return selected;
+		}
+
+		public Widget setWidth(int Width) {
+			this.dimensions.dims[0] = Width;
+			return this;
+		}
+		
+		public Widget setHeight(int Height) {
+			this.dimensions.dims[1] = Height;
+			return this;
+		}
+		
+		public Widget setDiameter(int diameter) {
+			this.dimensions.dims[0] = diameter;
+			return this;
+		}
+
+		public Widget setX(float x) {
+			this.point = new Point(x, this.point.y);
+			return this;
+		}
+		
+		public Widget setY(float y) {
+			this.point = new Point(this.point.x, y);
+			return this;
+		}
+		
+		public Widget setPoint(Point point) {
+			this.point = point;
+			return this;
+		}
+		public Widget setDimensions(Dimensions dimensions) {
+			this.dimensions = dimensions;
+			return this;
+		}
+	}
+
+	abstract public class EllipseWidget extends Widget {
+		public EllipseWidget(Point point, Dimensions dimensions) {
+			super(new Point(point), new Dimensions(dimensions));
+		}
+		public boolean isTarget() {
+			return isTargetEllipse(this.point, this.dimensions);
+		}
+	}
 	
+	abstract public class RectangleWidget extends Widget {
+		public RectangleWidget(Point point, Dimensions dimensions) {
+			super(new Point(point), new Dimensions(dimensions));
+		}
+		public RectangleWidget() {
+			super();
+		}
+		public boolean isTarget() {
+			return isTargetRect(this.point, this.dimensions);
+		}
+	}
+
+
+/***********************************************************************************************/
 	
 	
 	/***********************************************************************************************/
 	public class Button extends RectangleWidget implements Command {
-		Command command;
-		String text;
-		int c;
-		int color_pressed;
-		int color_base;
-		int color_hovering;
+		Command command = null;
+		String text = "";
+		int c = 0;
+		int color_pressed = 0;
+		int color_base = 0;
+		int color_hovering = 0;
 
 		public Button(Command command, String text, int c, Point point, Dimensions dimensions) {
 			super(point, dimensions);
@@ -352,7 +527,21 @@ public class App {
 			this.text = text;
 			this.c = 255;
 		}
-		
+		public Button() {
+			super();
+		}
+		public Button setCommand(Command command) {
+			this.command = command;
+			return this;
+		}
+		public Button setText(String text) {
+			this.text = text;
+			return this;
+		}
+		public Button setColor(int c) {
+			this.c = c;
+			return this;
+		}
 		public void display() {
 
 			if (pressed) {
@@ -366,11 +555,16 @@ public class App {
 				parent.noStroke();
 			}
 			parent.rectMode(CORNER);
-			parent.rect(point.x, point.y, dimensions.dims[0], dimensions.dims[1]);
+			//throwing nullpointer exceptions is probably fine
+//			if(point != null && dimensions != null) {
+				parent.rect(point.x, point.y, dimensions.dims[0], dimensions.dims[1]);
+//			}
 			parent.fill(0);
 			parent.textAlign(CENTER);
 			parent.textSize(15);
-			parent.text(text, point.x + dimensions.dims[0] / 2, point.y + dimensions.dims[1] / 2);
+//			if(point != null && dimensions != null) {
+				parent.text(text, point.x + dimensions.dims[0] / 2, point.y + dimensions.dims[1] / 2);
+//			}
 		}
 
 		public void execute() {
@@ -466,88 +660,7 @@ public class App {
 	}
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-	abstract public class Widget extends Observer implements Displayable {
-		public Point point;
-		public Dimensions dimensions;
 
-		public Widget(Point point, Dimensions dimensions) {
-			this.point = point;
-			this.dimensions = dimensions;
-		}
-
-		public void onMouseHover() {
-		}
-
-		public void onMouseHoverOver() {
-		}
-
-		public void onMousePress() {
-		}
-
-		public void onMouseDrag(PVector mouse) {
-		}
-
-		public void onMouseHold() {
-		}
-
-		public void onMouseRelease() {
-		}
-
-		public void onKeyDown(char c) {
-		}
-
-		public void onKeyHold(char c) {
-		}
-
-		public void onKeyUp(char c) {
-		}
-
-		public boolean isSelected() {
-			return selected;
-		}
-
-		public void setWidth(int Width) {
-			this.dimensions.dims[0] = Width;
-		}
-
-		public void setHeight(int Height) {
-			this.dimensions.dims[1] = Height;
-		}
-
-		public void setDiameter(int diameter) {
-			this.dimensions.dims[0] = diameter;
-		}
-
-		public void setX(float x) {
-			this.point = new Point(x, this.point.y);
-		}
-
-		public void setY(float y) {
-			this.point = new Point(this.point.x, y);
-		}
-	}
-	
-	abstract public class EllipseWidget extends Widget {
-		public EllipseWidget(Point point, Dimensions dimensions) {
-			super(new Point(point), new Dimensions(dimensions));
-		}
-		public boolean isTarget() {
-			return isTargetEllipse(this.point, this.dimensions);
-		}
-	}
-	
-	abstract public class RectangleWidget extends Widget {
-		public RectangleWidget(Point point, Dimensions dimensions) {
-			super(new Point(point), new Dimensions(dimensions));
-		}
-		public boolean isTarget() {
-			return isTargetRect(this.point, this.dimensions);
-		}
-	}
-	
-
-	/***********************************************************************************************/
 /////////////////////////////////////////////////////////////////////////////////////////////////
 	interface Listener {
 		void listen();
